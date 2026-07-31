@@ -1,0 +1,75 @@
+project:
+  name: agent-evaluation-framework
+  author: Linlin Zhang
+  github: linz21
+
+# The system under evaluation lives in a SIBLING directory, same pattern
+# as Project 3's own dependency on Project 2 (cross-project imports via
+# explicit file-path loading — see src/eval/agent_runner.py for why a
+# naive `sys.path` addition alone isn't enough, given the namespace
+# collision found when building Project 3).
+target_project:
+  path: "../crop_advisory_react_agent"
+  # Project 2 (agri_rag_literature_ga) also needed directly for golden
+  # dataset drafting (real literature context) — a SIBLING of this
+  # project, not derived from target_project.path (an earlier version
+  # tried deriving it via Path(target_project.path).parent, which is
+  # wrong: that just strips the last path component, resolving to this
+  # project's grandparent directory, not project 2's actual location).
+  project2_path: "../agri_rag_literature_ga"
+
+# "Agent versions" being benchmarked — each is a real, already-implemented
+# configuration switch in Project 3's own config.yaml (llm.provider,
+# llm.model_name), not a new agent built for this project. This directly
+# reuses the empirical work from Project 3: local Qwen2.5-1.5B showed real
+# synthesis failures, Qwen3-4B improved but still fabricated on tool
+# failure / memory verification, Claude Sonnet 4.5 resolved both. This
+# framework exists to quantify that comparison rigorously instead of
+# relying on manual read-through of a handful of transcripts.
+agent_versions:
+  - id: "qwen2.5-1.5b"
+    provider: "local"
+    model_name: "Qwen/Qwen2.5-1.5B-Instruct"
+  - id: "qwen3-4b"
+    provider: "local"
+    model_name: "Qwen/Qwen3-4B-Instruct-2507"
+  - id: "claude-sonnet-4.5"
+    provider: "anthropic"
+    anthropic_model: "claude-sonnet-4-5"
+
+golden_dataset:
+  path: "data/golden_qa_pairs.json"
+  target_size: 100
+  # Semi-automated build: an LLM drafts a candidate answer from real
+  # retrieved passages (Project 2's corpus for literature questions, real
+  # Project 1 API responses for yield questions), a human reviews/edits
+  # every single one before it's added — never auto-accepted. See
+  # scripts/build_golden_dataset.py.
+  draft_llm_provider: "anthropic"  # drafting quality matters even though this is a "draft"
+  draft_llm_model: "claude-sonnet-4-5"
+  # Rough split across question types, aiming for topical diversity
+  # rather than a purely uniform distribution
+  category_targets:
+    literature_only: 45
+    yield_only: 25
+    multi_tool: 20
+    out_of_scope: 10
+
+metrics:
+  # LLM-as-judge for task accuracy — uses a DIFFERENT model than any
+  # agent version being evaluated, to avoid a model favorably judging
+  # its own outputs (a real, known risk in LLM-as-judge setups).
+  judge_provider: "anthropic"
+  judge_model: "claude-opus-4-1"
+  hallucination_check: true
+  track_latency: true
+  track_tool_calls: true
+
+statistics:
+  bootstrap_iterations: 10000
+  confidence_level: 0.95
+  permutation_test_iterations: 10000
+  random_seed: 42  # reproducibility
+
+leaderboard:
+  results_dir: "data/results"

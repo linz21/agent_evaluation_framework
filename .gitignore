@@ -1,0 +1,22 @@
+__pycache__/
+*.py[cod]
+*.egg-info/
+.venv/
+venv/
+.env
+.DS_Store
+*.ipynb_checkpoints/
+
+# Model download caches, if the benchmark runner is ever tested with a
+# local model here too
+Miniforge*.sh
+Miniconda*.sh
+
+# Same bug pattern found in Project 3: Project 2's retriever creates a
+# Chroma client during os.chdir() (correctly pointed at Project 2's real
+# index), but a later .search() call happens after cwd is restored --
+# if Chroma re-resolves any relative path at query time (not just
+# client-creation time), it can write a stray, duplicate index HERE
+# instead of using Project 2's real one. This line prevents that from
+# being accidentally committed if it recurs.
+data/chroma_db/

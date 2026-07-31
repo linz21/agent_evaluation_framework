@@ -1,0 +1,362 @@
+[
+  {
+    "question": "What's the best way to train a dog?",
+    "category": "out_of_scope",
+    "ground_truth": "The agent should decline to answer, note that this is outside its scope (corn yield / agronomic research), and should NOT attempt a guess or call either tool.",
+    "reference_pmids": []
+  },
+  {
+    "question": "How do I bake a chocolate cake?",
+    "category": "out_of_scope",
+    "ground_truth": "The agent should decline to answer, note that this is outside its scope (corn yield / agronomic research), and should NOT attempt a guess or call either tool.",
+    "reference_pmids": []
+  },
+  {
+    "question": "What's the weather like in Paris?",
+    "category": "out_of_scope",
+    "ground_truth": "The agent should decline to answer, note that this is outside its scope (corn yield / agronomic research), and should NOT attempt a guess or call either tool.",
+    "reference_pmids": []
+  },
+  {
+    "question": "Can you recommend a good science fiction novel?",
+    "category": "out_of_scope",
+    "ground_truth": "The agent should decline to answer, note that this is outside its scope (corn yield / agronomic research), and should NOT attempt a guess or call either tool.",
+    "reference_pmids": []
+  },
+  {
+    "question": "How do I fix a flat bicycle tire?",
+    "category": "out_of_scope",
+    "ground_truth": "The agent should decline to answer, note that this is outside its scope (corn yield / agronomic research), and should NOT attempt a guess or call either tool.",
+    "reference_pmids": []
+  },
+  {
+    "question": "What's the capital of Australia?",
+    "category": "out_of_scope",
+    "ground_truth": "The agent should decline to answer, note that this is outside its scope (corn yield / agronomic research), and should NOT attempt a guess or call either tool.",
+    "reference_pmids": []
+  },
+  {
+    "question": "How do I invest in the stock market?",
+    "category": "out_of_scope",
+    "ground_truth": "The agent should decline to answer, note that this is outside its scope (corn yield / agronomic research), and should NOT attempt a guess or call either tool.",
+    "reference_pmids": []
+  },
+  {
+    "question": "What's a good workout routine for beginners?",
+    "category": "out_of_scope",
+    "ground_truth": "The agent should decline to answer, note that this is outside its scope (corn yield / agronomic research), and should NOT attempt a guess or call either tool.",
+    "reference_pmids": []
+  },
+  {
+    "question": "How do I learn to play the guitar?",
+    "category": "out_of_scope",
+    "ground_truth": "The agent should decline to answer, note that this is outside its scope (corn yield / agronomic research), and should NOT attempt a guess or call either tool.",
+    "reference_pmids": []
+  },
+  {
+    "question": "What's the best programming language for web development?",
+    "category": "out_of_scope",
+    "ground_truth": "The agent should decline to answer, note that this is outside its scope (corn yield / agronomic research), and should NOT attempt a guess or call either tool.",
+    "reference_pmids": []
+  },
+  {
+    "question": "How does nitrogen timing affect corn yield?",
+    "category": "literature_only",
+    "ground_truth": "Based on the provided data, there is limited direct information about how nitrogen *timing* specifically affects corn yield. Study [1] compares nitrogen application *levels* (150 vs 200 kg/ha) in sweet corn, finding that the lower rate (N150) produced 3.16% higher yields than N200, but this addresses rate rather than timing. Study [4] examines timing in winter wheat (not corn), finding that application timing at 90 GDD produced optimal yields and that single well-timed applications performed as well as split applications. The data does not contain specific information about how different timing strategies affect corn yield outcomes.",
+    "reference_pmids": [
+      "41600007",
+      "41203291",
+      "41681621",
+      "41281325",
+      "40115941"
+    ]
+  },
+  {
+    "question": "What is the function of the ZmWRKY74 gene in maize?",
+    "category": "literature_only",
+    "ground_truth": "Based on the provided data, ZmWRKY74 participates in maize drought stress response by regulating antioxidant enzyme activity and proline accumulation. Overexpression of ZmWRKY74 significantly reduced drought tolerance in maize, with overexpression lines showing decreased antioxidant enzyme activities and proline content, along with increased sensitivity to drought-induced oxidative damage. ZmWRKY74 interacts with ZmNAC49, and this interaction suppresses expression of ZmSOD3 and enhances ZmWRKY74's binding to the ZmAAP3 promoter, thereby strengthening transcriptional repression of ZmAAP3.",
+    "reference_pmids": [
+      "42061586",
+      "42475581",
+      "42082112",
+      "41437219",
+      "41814572"
+    ]
+  },
+  {
+    "question": "How does Aspergillus flavus cause aflatoxin contamination in maize?",
+    "category": "literature_only",
+    "ground_truth": "Based on the provided data, Aspergillus flavus causes aflatoxin contamination in maize through post-harvest infection and subsequent production of aflatoxin B. The fungus's growth and mycotoxin production are regulated by environmental factors, particularly temperature and water activity. However, the specific mechanisms of how A. flavus infects maize or the biological processes by which it produces aflatoxins are not detailed in the provided data.",
+    "reference_pmids": [
+      "40974689",
+      "42425690",
+      "41227739",
+      "41745266",
+      "41643615"
+    ]
+  },
+  {
+    "question": "What are the applications of UAV imaging in crop monitoring?",
+    "category": "literature_only",
+    "ground_truth": "Based on the provided data, UAV imaging applications in crop monitoring include:\n\n1. **Disease detection and mapping**: UAVs equipped with multispectral and RGB cameras are used to detect and classify specific crop diseases in wheat, corn, soybean, and maize, enabling early identification and targeted management interventions.\n\n2. **Yield prediction**: Multi-temporal UAV observations combining multispectral and RGB imagery at different growth stages improve wheat yield estimation accuracy through machine learning models that capture cumulative growth effects.\n\n3. **Crop health assessment**: UAV-based systems provide high-resolution, spatially detailed monitoring of crop health status, distinguishing healthy from diseased plants using vegetation indices (NDVI, GNDVI, NDRE) and other spectral-spatial features.\n\n4. **Trait monitoring**: UAV imaging facilitates automated, high-throughput phenotyping and trait acquisition across various spatial and temporal scales in field conditions.",
+    "reference_pmids": [
+      "41600171",
+      "42122837",
+      "42445682",
+      "41695522",
+      "42151332"
+    ]
+  },
+  {
+    "question": "How is CRISPR used to improve crop stress tolerance?",
+    "category": "literature_only",
+    "ground_truth": "Based on the provided data, CRISPR is used to improve crop stress tolerance through targeted gene editing strategies in major crops including rice, wheat, maize, tomato, and barley. Specific applications include editing transcription factors (such as ART1, DRO1, OsDST) to enhance drought and salinity tolerance, modifying transporter genes (OsHMA2, OsNramp5) for heavy metal detoxification, and disrupting susceptibility genes (MLO, OsERF922, CsLOB1) to provide disease and pest resistance. The technology employs both gene knockout and knock-in approaches, with CRISPR/Cas9 being preferred over earlier tools due to its superior precision, efficiency, scalability, and affordability. Recent advances include the use of nanobiotechnology-enabled delivery systems (such as lipid nanoparticles and engineered nanocarriers) that enable DNA-free editing through ribonucleoprotein complexes, overcoming the plant cell wall barrier that has been a major bottleneck in plant genetic transformation.",
+    "reference_pmids": [
+      "42469498",
+      "41452514",
+      "42475581",
+      "42061586",
+      "41567401"
+    ]
+  },
+  {
+    "question": "How does drought stress affect corn physiology?",
+    "category": "literature_only",
+    "ground_truth": "Based on the provided data, drought stress affects corn (maize) physiology in several key ways. Drought significantly reduces morphological parameters including plant height, leaf length, and chlorophyll content (both chlorophyll a and b) at all growth stages, with the greatest reductions observed during grain filling. Physiologically, drought stress triggers adaptive responses including increased accumulation of osmolytes (proline increased by 23-24% and soluble sugars by 18-23% in tested cultivars) and potassium levels, while nitrogen and phosphorus contents decrease. Additionally, drought affects antioxidant enzyme activities and can cause oxidative damage, with these physiological changes ultimately contributing to grain yield losses estimated at 15-20% worldwide in maize.",
+    "reference_pmids": [
+      "41567401",
+      "42278532",
+      "41399095",
+      "42061586",
+      "41348808"
+    ]
+  },
+  {
+    "question": "What role does zinc play in soil-plant systems?",
+    "category": "literature_only",
+    "ground_truth": "Based on the provided data, zinc plays several essential roles in soil-plant systems. In soils, zinc behavior is governed by factors including pH, organic matter, clay content, and redox conditions, with its availability decreasing in alkaline, calcareous, and sandy soils, while solubility increases 100-fold per unit decline in pH. In plants, zinc is essential for enzyme activation, membrane stabilization, and growth regulation. However, both zinc deficiency and excessive accumulation can adversely affect plant performance, leading to impaired metabolism, oxidative stress, and micronutrient interactions.",
+    "reference_pmids": [
+      "42147736",
+      "42052283",
+      "41493625",
+      "41980076",
+      "41291981"
+    ]
+  },
+  {
+    "question": "How can biocontrol methods like Bacillus species be used in sustainable agriculture?",
+    "category": "literature_only",
+    "ground_truth": "Based on the provided data, Bacillus species can be used in sustainable agriculture as biocontrol agents with multiple mechanisms of action, including antibiosis, siderophore production, biofilm formation, induction of systemic resistance, and secretion of lytic enzymes. These bacteria function as plant growth-promoting rhizobacteria (PGPR) by modulating phytohormone levels, improving nutrient acquisition, and mitigating abiotic stresses like drought, salinity, and heat. Bacillus species can combat a broad spectrum of threats including fungal, bacterial, viral, nematodal, and insect pests across diverse agroecosystems, providing an eco-friendly alternative to synthetic agrochemicals. However, challenges remain in formulation stability, field performance consistency, and regulatory harmonization that need to be addressed for optimal implementation.",
+    "reference_pmids": [
+      "41632308",
+      "41099080",
+      "42250135",
+      "41753774",
+      "42187275"
+    ]
+  },
+  {
+    "question": "What precision agriculture technologies improve crop management?",
+    "category": "literature_only",
+    "ground_truth": "Several precision agriculture technologies improve crop management through targeted sensing and delivery approaches. Printing technologies (inkjet, screen, aerosol jet, 3D printing, and direct laser writing) enable fabrication of flexible, large-area, plant-integrated sensors that monitor soil, plant, and environmental conditions in real time across large areas. Nanomaterial-based platforms, including MXene/MBene materials, support plant-immunoengineering and controlled protection, serving as carriers for targeted delivery and sustained release of plant-protective compounds while reducing overall agrochemical consumption. A 3D-printed nanoparticle platform enables engineered, staged release of micronutrients (zinc, iron, manganese) to wheat plants at different growth stages, using variable cross-linking to control release timing. UAV-based systems use leaf area index (LAI) estimation in winter wheat to guide field-scale agronomic management decisions through improved yield prediction. Additionally, polyvinyl alcohol-based microneedle systems provide precise, low-dose delivery of growth-promoting compounds directly into plant tissues with minimal wounding, demonstrating higher delivery efficiency than traditional foliar spray or soil application methods.",
+    "reference_pmids": [
+      "41580442",
+      "41099080",
+      "41283215",
+      "40647995",
+      "41935949"
+    ]
+  },
+  {
+    "question": "What are the effects of heavy metal contamination on agricultural soils?",
+    "category": "literature_only",
+    "ground_truth": "Based on the provided data, heavy metal contamination in agricultural soils threatens food security, soil health, and human well-being through multiple pathways. The contamination causes yield penalties, increased sterility, poorer grain set, and higher contaminant loading in edible crops, with the strongest effects occurring through redox imbalance, disrupted transporter systems, altered hormone metabolism, and reproductive organ injury. Long-term application of certain organic composts can enhance soil heavy metal accumulation, though the relationship between total accumulation and actual ecological and health risks depends on metal speciation and bioavailability. Heavy metals can be actively transported into plant roots via nutrient transporters, then translocated to aerial parts and storage organs, ultimately threatening consumer safety when contaminated crops are consumed.",
+    "reference_pmids": [
+      "41061495",
+      "41208603",
+      "41739391",
+      "42147736",
+      "42297270"
+    ]
+  },
+  {
+    "question": "What corn yield should I expect in Illinois in 2024?",
+    "category": "yield_only",
+    "ground_truth": "Based on the provided data, you should expect a corn yield of 169.82 bushels per acre in Illinois in 2024. The 95% confidence interval for this estimate ranges from 147.05 to 193.28 bushels per acre \u2014 a range constructed such that, under repeated sampling, 95% of such intervals would contain the true yield value.",
+    "reference_pmids": []
+  },
+  {
+    "question": "What corn yield should I expect in Iowa in 2025?",
+    "category": "yield_only",
+    "ground_truth": "Based on the provided data, you should expect a corn yield of 167.87 bushels per acre in Iowa in 2025. The prediction includes a 95% confidence interval ranging from 145.09 to 191.33 bushels per acre, indicating the actual yield could fall anywhere within this range. No additional context about the source, methodology, or conditions underlying this forecast is provided in the data.",
+    "reference_pmids": []
+  },
+  {
+    "question": "What is the predicted corn yield for Nebraska in 2024?",
+    "category": "yield_only",
+    "ground_truth": "Based on the provided data, the predicted corn yield for Nebraska in 2024 is 169.56 bushels per acre. The prediction includes a 95% confidence interval ranging from 146.79 to 193.02 bushels per acre.",
+    "reference_pmids": []
+  },
+  {
+    "question": "What yield should I expect for corn in Minnesota in 2025?",
+    "category": "yield_only",
+    "ground_truth": "Based on the provided data, you should expect a corn yield of 171.31 bushels per acre in Minnesota in 2025. The 95% confidence interval for this prediction ranges from 148.53 to 194.77 bushels per acre, meaning there is considerable uncertainty in the estimate. The actual yield could reasonably fall anywhere within this range.",
+    "reference_pmids": []
+  },
+  {
+    "question": "What is the forecasted corn yield for Indiana in 2024?",
+    "category": "yield_only",
+    "ground_truth": "Based on the provided data, the forecasted corn yield for Indiana in 2024 is 170.48 bushels per acre. The forecast includes a 95% confidence interval ranging from 147.7 to 193.93 bushels per acre, reflecting the level of uncertainty in this estimate.",
+    "reference_pmids": []
+  },
+  {
+    "question": "How much corn yield can I expect in Ohio in 2025?",
+    "category": "yield_only",
+    "ground_truth": "Based on the provided data, you can expect a corn yield of 173.0 bushels per acre in Ohio in 2025. The 95% confidence interval for this estimate ranges from 150.22 to 196.45 bushels per acre, reflecting the level of uncertainty in this estimate.",
+    "reference_pmids": []
+  },
+  {
+    "question": "What is the predicted corn yield for Wisconsin in 2024?",
+    "category": "yield_only",
+    "ground_truth": "The predicted corn yield for Wisconsin in 2024 is 171.35 bushels per acre, with a 95% confidence interval of 148.57 to 194.8 bushels per acre, reflecting the level of uncertainty in this estimate.",
+    "reference_pmids": []
+  },
+  {
+    "question": "What corn yield forecast is there for Kansas in 2025?",
+    "category": "yield_only",
+    "ground_truth": "The corn yield forecast for Kansas in 2025 is 170.15 bushels per acre, with a 95% confidence interval of 147.37 to 193.6 bushels per acre, reflecting the level of uncertainty in this estimate.",
+    "reference_pmids": []
+  },
+  {
+    "question": "What yield should I plan for corn in Missouri in 2024?",
+    "category": "yield_only",
+    "ground_truth": "Based on the provided data, you should plan for a corn yield of 171.85 bushels per acre in Missouri in 2024. The 95% confidence interval ranges from 149.08 to 195.31 bushels per acre, reflecting the level of uncertainty in this estimate. This suggests the estimate could reasonably vary by roughly 22-23 bushels per acre in either direction from the central estimate.",
+    "reference_pmids": []
+  },
+  {
+    "question": "What is the expected corn yield for South Dakota in 2025?",
+    "category": "yield_only",
+    "ground_truth": "The expected corn yield for South Dakota in 2025 is 159.64 bushels per acre. The 95% confidence interval ranges from 136.87 to 183.1 bushels per acre, reflecting the level of uncertainty in this estimate.",
+    "reference_pmids": []
+  },
+  {
+    "question": "What corn yield should I expect in Illinois in 2024, and what farming practices could help improve it?",
+    "category": "multi_tool",
+    "ground_truth": "Based on the yield prediction model, the corn yield forecast for Illinois in 2024 is 169.82 bushels per acre, with a 95% confidence interval of 147.05 to 193.28 bushels per acre, reflecting the level of uncertainty in this estimate. Regarding farming practices to improve yield, the literature search for this question retrieved papers about yield prediction methodology (machine learning models, feature importance) rather than specific agronomic practice recommendations, so no practice-specific guidance can be provided from this search.",
+    "reference_pmids": [
+      "41844707",
+      "40670520",
+      "41714397",
+      "42234662",
+      "41499983"
+    ]
+  },
+  {
+    "question": "What yield can I expect for corn in Iowa in 2025, and how does nitrogen timing affect that?",
+    "category": "multi_tool",
+    "ground_truth": "The provided data does not contain information about corn yield expectations in Iowa for 2025 or how nitrogen timing affects corn yield specifically. While the data includes studies on corn yield prediction using machine learning models at the county level in the United States and research on biofertilizer applications for corn, none of these studies provide specific yield figures for Iowa in 2025 or examine nitrogen timing effects on corn. The nitrogen timing studies in the data focus exclusively on wheat, not corn, so they cannot answer your question about corn production.",
+    "reference_pmids": [
+      "41281325",
+      "41714397",
+      "41844707",
+      "41907744",
+      "41340035"
+    ]
+  },
+  {
+    "question": "Given a corn yield forecast for Nebraska in 2024, what agronomic practices support higher yields?",
+    "category": "multi_tool",
+    "ground_truth": "The corn yield forecast for Nebraska in 2024 is 169.56 bu/acre (95% CI: 146.79-193.02 bu/acre), reflecting the level of uncertainty in this estimate. Research on agronomic practices supporting higher corn yields identifies several approaches: microbial bioinoculants (particularly multi-strain consortia combining bacterial and fungal strains) increased maize shoot length by 31%, ear number, and kernels per ear by 36% in field trials; biogas slurry substitution for chemical fertilizer (particularly at <50% substitution rates under equivalent nitrogen input) increased yields by 3.4% while improving soil organic matter and economic returns by 14.7%; and arbuscular mycorrhizal fungi (AMF) applications showed benefits under low fertilizer conditions. Key physiological factors identified include canopy temperature, leaf area index interactions with dry matter yield, and nutrient uptake efficiency (particularly nitrogen and phosphorus).",
+    "reference_pmids": [
+      "41372819",
+      "41452514",
+      "41714397",
+      "42030873",
+      "41745266"
+    ]
+  },
+  {
+    "question": "What corn yield should I expect in Minnesota in 2025, and how could drought stress affect that forecast?",
+    "category": "multi_tool",
+    "ground_truth": "Based on the provided data, the expected corn yield for Minnesota in 2025 is 171.31 bushels per acre, with a 95% confidence interval of 148.53-194.77 bu/acre reflecting the level of uncertainty in this estimate. Research indicates that drought stress can cause up to 15-20% grain yield losses in maize worldwide, with the greatest reductions observed during the grain filling stage. Drought significantly reduces plant height, leaf length, and chlorophyll content, while also affecting ear production under severe stress conditions, though the specific impact on the Minnesota 2025 forecast would depend on the actual occurrence and timing of drought stress.",
+    "reference_pmids": [
+      "41567401",
+      "41348808",
+      "41399095",
+      "42475581",
+      "42278532"
+    ]
+  },
+  {
+    "question": "What is the predicted yield for Indiana in 2024, and what soil health practices could improve it?",
+    "category": "multi_tool",
+    "ground_truth": "The predicted corn yield for Indiana in 2024 is 170.48 bushels per acre, with a 95% confidence interval of 147.7-193.93 bushels per acre, reflecting the level of uncertainty in this estimate. Research indicates several soil health practices that could improve corn yields: applying plant growth-promoting rhizobacteria (PGPR), particularly Pseudomonas and Bacillus species, has been shown to enhance maize growth by improving nutrient availability, regulating plant hormones, and increasing stress tolerance. Additionally, substituting biogas slurry for chemical fertilizer has been found to improve soil organic matter and available nutrients while increasing net income by 14.7%, with partial substitution (less than 50%) showing yield increases of 3.4% under equivalent nitrogen input. Multi-strain microbial consortia combining bacterial and fungal strains have demonstrated particularly strong results, with one study reporting up to 36% increases in kernels per ear in maize.",
+    "reference_pmids": [
+      "42250135",
+      "41309976",
+      "41603977",
+      "42030873",
+      "41372819"
+    ]
+  },
+  {
+    "question": "What corn yield should I expect in Ohio in 2025, and what role does planting density play in yield outcomes?",
+    "category": "multi_tool",
+    "ground_truth": "Based on the provided data, the predicted corn yield for Ohio in 2025 is 173.0 bu/acre, with a 95% confidence interval of 150.22-196.45 bu/acre reflecting the level of uncertainty in this estimate. Research demonstrates that planting density plays a significant role in corn yield outcomes, with increasing density identified as a primary factor driving ear yield improvement. Studies show that higher planting densities can enhance yield by increasing grains per ear and kernel weight, though the optimal density varies by region and must be balanced with other factors like nitrogen application to maximize benefits while managing plant competition and lodging resistance. The data indicates that coordinating appropriate planting density with nitrogen management improves overall yield performance in corn production.",
+    "reference_pmids": [
+      "41754252",
+      "41681621",
+      "41600007",
+      "41844707",
+      "42255311"
+    ]
+  },
+  {
+    "question": "Given the corn yield forecast for Wisconsin in 2024, what pest management practices are recommended?",
+    "category": "multi_tool",
+    "ground_truth": "The data provides a corn yield forecast of 171.35 bu/acre for Wisconsin in 2024 (95% CI: 148.57-194.8 bu/acre, reflecting the level of uncertainty in this estimate), but does not include pest management practices specifically recommended for corn production. The literature search results focus on emerging technologies such as nano-pesticides, genome editing for abiotic stress tolerance, and microbial bioremediation of pesticide residues, rather than practical pest management recommendations for corn growers. One study mentions that Pseudomonas bacteria can help manage Fusarium verticillioides in maize through antifungal compounds and induced systemic resistance, though this addresses disease management rather than insect pests.",
+    "reference_pmids": [
+      "42404978",
+      "41603977",
+      "41452514",
+      "41099080",
+      "41461407"
+    ]
+  },
+  {
+    "question": "What yield should I expect in Kansas in 2025, and how does irrigation management affect that?",
+    "category": "multi_tool",
+    "ground_truth": "Based on the provided data, you should expect a corn yield of 170.15 bu/acre in Kansas in 2025, with a 95% confidence interval of 147.37-193.6 bu/acre reflecting the level of uncertainty in this estimate. \n\nRegarding irrigation management effects, research shows that groundwater depth significantly influences corn yields, with optimal depths between 1.1 and 2.5 meters providing an average 3.4% yield increase (roughly doubling in dry conditions), while shallower or deeper groundwater levels reduce this benefit. However, the provided data does not contain specific information about how surface irrigation management practices (such as timing, frequency, or amount of applied water) affect the Kansas 2025 yield prediction.",
+    "reference_pmids": [
+      "39186643",
+      "41658525",
+      "41567401",
+      "41606476",
+      "41309976"
+    ]
+  },
+  {
+    "question": "What is the predicted corn yield for Missouri in 2024, and what nitrogen management practices could help?",
+    "category": "multi_tool",
+    "ground_truth": "The predicted corn yield for Missouri in 2024 is 171.85 bu/acre, with a 95% confidence interval of 149.08-195.31 bu/acre reflecting the level of uncertainty in this estimate. \n\nRegarding nitrogen management practices, the provided literature does not contain research specifically focused on corn nitrogen management that would directly inform practices for Missouri. The search results primarily address nitrogen management in wheat, alfalfa, and silage maize, with one study on sweet corn showing that moderate nitrogen application (150 kg/ha) improved yields compared to higher rates (200 kg/ha) by enhancing root systems and reducing lodging, though this research was not conducted on field corn or in Missouri conditions.",
+    "reference_pmids": [
+      "40764358",
+      "41658525",
+      "41600007",
+      "40115941",
+      "41203291"
+    ]
+  },
+  {
+    "question": "What corn yield should I expect in South Dakota in 2025, and how might precision agriculture technologies improve it?",
+    "category": "multi_tool",
+    "ground_truth": "The predicted corn yield for South Dakota in 2025 is 159.64 bushels per acre, with a 95% confidence interval of 136.87-183.1 bu/acre, reflecting the level of uncertainty in this estimate. Several precision agriculture technologies could help improve crop management: printing technologies (inkjet, screen, aerosol jet, 3D printing) enable flexible, plant- integrated sensors for real-time monitoring of soil, plant, and environmental conditions. Nanomaterial-based platforms support targeted, controlled release of protective compounds and micronutrients, including a 3D-printed system enabling staged zinc, iron, and manganese release in wheat at different growth stages. UAV-based systems use leaf area index estimation to guide field-scale management decisions through improved yield prediction. Additionally, microneedle delivery systems provide precise, low-dose delivery of growth-promoting compounds directly into plant tissues, demonstrating higher efficiency than traditional application methods.",
+    "reference_pmids": [
+      "41580442",
+      "41099080",
+      "41283215",
+      "40647995",
+      "41935949"
+    ]
+  }
+]

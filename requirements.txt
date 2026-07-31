@@ -1,0 +1,14 @@
+# Golden dataset drafting
+anthropic==0.34.0
+requests==2.32.3
+pyyaml==6.0.1
+
+# Cross-project literature retrieval (Project 2's own dependencies also
+# needed in this environment, same as Project 3's setup — see README)
+
+# Statistics (added as the stats module is built)
+numpy
+scipy
+
+# Testing
+pytest==8.2.0
