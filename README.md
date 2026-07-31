@@ -2,17 +2,22 @@
 
 **Author:** Linlin Zhang · [github.com/linz21](https://github.com/linz21)
 
-A statistical benchmarking framework for comparing different configurations
+A statistical benchmarking framework for comparing two configurations
 ("versions") of the Crop Advisory ReAct Agent (Project 3): local
-Qwen2.5-1.5B, local Qwen3-4B, and Claude Sonnet 4.5. Built on a
-semi-automated, human-reviewed golden dataset and rigorous statistical
-methods (bootstrap confidence intervals, permutation significance tests)
-rather than single-number comparisons.
+Qwen3-4B vs. Claude Sonnet 4.5 — the genuinely open question of local
+vs. API reliability and cost. (A third version, Qwen2.5-1.5B, was
+considered but dropped — its clear synthesis failures were already
+well-established from Project 3's own development, which is specifically
+what motivated moving to Qwen3-4B in the first place; comparing it again
+here wouldn't add new information.) Built on a semi-automated,
+human-reviewed golden dataset and rigorous statistical methods (bootstrap
+confidence intervals, permutation significance tests) rather than
+single-number comparisons.
 
 ## Why this project exists
 
 Throughout Project 3's development, real, evidence-based findings emerged
-about differences between these three configurations — synthesis quality,
+about differences between these configurations — synthesis quality,
 fabrication on tool failure, fabrication on memory verification — all
 discovered through manual, ad-hoc testing of individual questions. This
 project exists to make that comparison **systematic and statistically
@@ -24,7 +29,7 @@ significance testing, rather than reading through transcripts by hand.
 ```
 Golden dataset (40 human-reviewed Q&A pairs)
         ↓
-Benchmark runner — same 40 questions through all 3 agent versions
+Benchmark runner — same 40 questions through both agent versions
         ↓
 Metrics: task accuracy (LLM-judge), tool-use efficiency,
          hallucination rate, latency
@@ -51,7 +56,7 @@ Streamlit leaderboard — ranked results, drill-down into failure cases
 - ⬜ `src/eval/metrics.py` — task accuracy (LLM-as-judge), tool-use
   efficiency, hallucination rate, latency tracking
 - ⬜ `src/eval/agent_runner.py` — runs the golden dataset through each of
-  Project 3's 3 agent versions
+  Project 3's 2 agent versions
 - ⬜ `src/leaderboard/` — Streamlit app for ranked results + failure-case
   drill-down
 - ⬜ Actually running the benchmark and analyzing results
@@ -86,7 +91,7 @@ python scripts/validate_golden_dataset.py
 ## Tech Stack
 
 `numpy` + `scipy` (statistical methods) · Claude Sonnet 4.5 (golden
-dataset drafting, one of 3 benchmarked agent versions, and LLM-judge) ·
+dataset drafting, one of 2 benchmarked agent versions, and LLM-judge) ·
 Project 2's retriever (real literature context for drafting) · Project 1's
 live API (real yield data for drafting) · `Streamlit` (planned, for the
 leaderboard)

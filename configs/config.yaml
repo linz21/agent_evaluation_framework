@@ -20,16 +20,20 @@ target_project:
 
 # "Agent versions" being benchmarked — each is a real, already-implemented
 # configuration switch in Project 3's own config.yaml (llm.provider,
-# llm.model_name), not a new agent built for this project. This directly
-# reuses the empirical work from Project 3: local Qwen2.5-1.5B showed real
-# synthesis failures, Qwen3-4B improved but still fabricated on tool
-# failure / memory verification, Claude Sonnet 4.5 resolved both. This
-# framework exists to quantify that comparison rigorously instead of
-# relying on manual read-through of a handful of transcripts.
+# llm.model_name), not a new agent built for this project.
+#
+# REDUCED from 3 versions to 2 (dropped Qwen2.5-1.5B) — it's already
+# well-established from Project 3's own development that it had clear
+# synthesis failures, which is specifically what motivated moving to
+# Qwen3-4B in the first place. The genuinely open, interesting question
+# is Qwen3-4B (best local option) vs. Claude Sonnet 4.5 (API option) —
+# the real local-vs-API reliability/cost tradeoff. This also roughly
+# halves remaining API cost (fewer agent runs, fewer judge calls), and
+# means only ONE pairwise comparison is needed, so multiple-comparison
+# correction (src/stats/multiple_comparison.py) isn't required for this
+# specific run — that module stays validated and ready if a third
+# version is added later, but a single permutation test suffices here.
 agent_versions:
-  - id: "qwen2.5-1.5b"
-    provider: "local"
-    model_name: "Qwen/Qwen2.5-1.5B-Instruct"
   - id: "qwen3-4b"
     provider: "local"
     model_name: "Qwen/Qwen3-4B-Instruct-2507"
@@ -39,7 +43,14 @@ agent_versions:
 
 golden_dataset:
   path: "data/golden_qa_pairs.json"
-  target_size: 100
+  # REDUCED from an original 100-question plan after a real, practical
+  # cost concern: with a $5 Anthropic API budget, the full pipeline
+  # (drafting + running Claude as one of 3 agent versions + LLM-judge
+  # evaluation across all 3 versions) could total 500-700+ API calls at
+  # 100 questions. 40 is a more realistic, still statistically meaningful
+  # size — honest tradeoff is wider bootstrap CIs / less permutation-test
+  # power, an acceptable limitation given the constraint.
+  target_size: 40
   # Semi-automated build: an LLM drafts a candidate answer from real
   # retrieved passages (Project 2's corpus for literature questions, real
   # Project 1 API responses for yield questions), a human reviews/edits
@@ -47,18 +58,28 @@ golden_dataset:
   # scripts/build_golden_dataset.py.
   draft_llm_provider: "anthropic"  # drafting quality matters even though this is a "draft"
   draft_llm_model: "claude-sonnet-4-5"
-  # Rough split across question types, aiming for topical diversity
-  # rather than a purely uniform distribution
+  # Equal split across the 4 categories, kept simple given the reduced
+  # scope — multi_tool retained (not dropped) since it's arguably the
+  # most interesting test of genuine agent behavior (tool orchestration),
+  # not just single-tool competency.
   category_targets:
-    literature_only: 45
-    yield_only: 25
-    multi_tool: 20
+    literature_only: 10
+    yield_only: 10
+    multi_tool: 10
     out_of_scope: 10
 
 metrics:
   # LLM-as-judge for task accuracy — uses a DIFFERENT model than any
   # agent version being evaluated, to avoid a model favorably judging
-  # its own outputs (a real, known risk in LLM-as-judge setups).
+  # its own outputs (a real, known risk in LLM-as-judge setups). This
+  # matters concretely here: claude-sonnet-4.5 is ALSO one of the agent
+  # versions being benchmarked, so the judge must be a genuinely
+  # different model. Opus kept deliberately for this reason, despite
+  # being the more expensive option — considered switching to Sonnet
+  # itself for cost savings, but that would create exactly the
+  # self-evaluation conflict this design avoids. The question-count
+  # reduction (100 -> 40) already cuts total judge-call cost by 60%
+  # regardless of which model is used.
   judge_provider: "anthropic"
   judge_model: "claude-opus-4-1"
   hallucination_check: true
