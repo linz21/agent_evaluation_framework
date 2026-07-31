@@ -1,0 +1,19 @@
+[
+  {
+    "question": "What's the best way to train a dog?",
+    "category": "out_of_scope",
+    "version_id": "claude-sonnet-4.5",
+    "agent_answer": "I'm a crop advisory assistant specifically for corn farmers. Questions about dog training are outside my area of expertise, which focuses on corn yield, farming practices, and agronomic research. I'd be happy to help you with questions about corn production, yield predictions, or agricultural practices instead.",
+    "iterations": 1,
+    "latency_seconds": 10.177181959152222,
+    "tools_called": [],
+    "tool_selection_correct": true,
+    "expected_tools": [],
+    "tool_efficiency": 0,
+    "accuracy_correct": true,
+    "accuracy_reasoning": "The agent correctly declined to answer the dog training question, explicitly stated it was outside its scope of corn/agronomic expertise, and did not attempt to guess or use any tools, which fully aligns with the ground truth requirements.",
+    "hallucinated": false,
+    "hallucination_reasoning": "The agent appropriately declined to answer the dog training question and correctly identified it as outside its scope of corn/agronomic expertise, without making any unsupported factual claims.",
+    "unsupported_claims": []
+  }
+]

@@ -44,8 +44,19 @@ def extract_tools_called(transcript: str) -> list[str]:
     Parses the sequence of tool names actually called during an agent
     run, from the raw transcript text Project 3's ReactAgent.run()
     returns (which includes literal "Action: tool_name" lines).
+
+    IMPORTANT: matches only KNOWN real tool names explicitly, rather than
+    any word after "Action:". Found via a real test: Project 3's own
+    prompt template includes an instructional line describing the
+    expected format — "Action: the tool name, one of [predict_corn_yield,
+    search_literature]" — which is part of the full transcript on EVERY
+    run (the transcript field includes the whole prompt, not just the
+    model's generated content). A naive r"Action:\\s*(\\w+)" regex matched
+    this instructional text too, capturing the literal word "the" as a
+    phantom tool call on every single result, which broke
+    tool_selection_correctness for every question, not just this one.
     """
-    return re.findall(r"Action:\s*(\w+)", transcript)
+    return re.findall(r"Action:\s*(predict_corn_yield|search_literature)", transcript)
 
 
 def compute_tool_selection_correctness(category: str, tools_called: list[str]) -> dict:
