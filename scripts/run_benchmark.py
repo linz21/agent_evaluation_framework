@@ -28,6 +28,7 @@ import yaml
 from src.eval.agent_runner import run_question_on_version
 from src.eval.metrics import (
     extract_tools_called,
+    extract_observations,
     compute_tool_selection_correctness,
     compute_tool_efficiency,
     judge_task_accuracy,
@@ -86,6 +87,7 @@ def run_one_version(version: dict, golden_data: list[dict], project3_path: Path,
         tools_called = extract_tools_called(run_result.get("transcript", ""))
         tool_selection = compute_tool_selection_correctness(entry["category"], tools_called)
         tool_efficiency = compute_tool_efficiency(tools_called)
+        retrieved_context = extract_observations(run_result.get("transcript", ""))
 
         try:
             accuracy = judge_task_accuracy(
@@ -97,7 +99,8 @@ def run_one_version(version: dict, golden_data: list[dict], project3_path: Path,
 
         try:
             hallucination = judge_hallucination(
-                question, entry["ground_truth"], run_result["answer"], api_key, judge_model
+                question, run_result["answer"], api_key, judge_model,
+                retrieved_context=retrieved_context,
             )
         except Exception as e:
             print(f"  ERROR judging hallucination: {e}")
@@ -119,6 +122,7 @@ def run_one_version(version: dict, golden_data: list[dict], project3_path: Path,
             "hallucinated": hallucination["hallucinated"],
             "hallucination_reasoning": hallucination["reasoning"],
             "unsupported_claims": hallucination["unsupported_claims"],
+            "retrieved_context": retrieved_context,
         }
 
         existing.append(result_row)

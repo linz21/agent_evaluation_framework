@@ -54,7 +54,6 @@ def main():
     print("=" * 60)
     r3 = judge_hallucination(
         question="What corn yield should I expect in Illinois in 2024?",
-        ground_truth="169.82 bushels per acre, based on the yield prediction model.",
         agent_answer="169.82 bushels per acre, according to a 2023 USDA field study of 500 farms across the Midwest.",
         api_key=api_key, judge_model="claude-haiku-4-5",
     )

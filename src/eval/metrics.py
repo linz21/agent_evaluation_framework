@@ -39,6 +39,21 @@ EXPECTED_TOOLS_BY_CATEGORY = {
 }
 
 
+def extract_observations(transcript: str) -> str:
+    """
+    Extracts all "Observation:" blocks from a transcript — the ACTUAL
+    tool results returned during this specific run (real retrieved
+    literature passages, real yield API responses). Used to give the
+    hallucination judge genuine grounding beyond just the golden
+    dataset's ground_truth field, which is a necessarily brief,
+    deliberately conservative summary that can legitimately omit real
+    details present in the full retrieved sources — see
+    judge_hallucination's docstring for why this matters.
+    """
+    observations = re.findall(r"Observation:\s*(.*?)(?=\nThought:|\Z)", transcript, re.DOTALL)
+    return "\n\n".join(obs.strip() for obs in observations)
+
+
 def extract_tools_called(transcript: str) -> list[str]:
     """
     Parses the sequence of tool names actually called during an agent
@@ -152,34 +167,93 @@ Respond with ONLY a JSON object, no other text:
     }
 
 
-def judge_hallucination(question: str, ground_truth: str, agent_answer: str,
-                        api_key: str, judge_model: str = "claude-opus-4-1") -> dict:
+def judge_hallucination(question: str, agent_answer: str,
+                        api_key: str, judge_model: str = "claude-opus-4-1",
+                        retrieved_context: str = None) -> dict:
     """
-    Detects whether the agent's answer contains specific factual claims
-    NOT supported by the ground truth — a DIFFERENT check from accuracy.
-    An answer can be accurate (correctly conservative) without
-    hallucinating; conversely an answer could technically be "on-topic"
-    while still inventing unsupported specifics (fake statistics, fake
-    citations, fake claims of certainty). This specifically targets the
-    fabrication failure mode found repeatedly during Project 3's
-    development (fabricated claims about prior conversation turns,
-    fabricated answers on tool failure).
+    Detects whether the agent's answer is FAITHFUL to what it actually
+    retrieved — a DIFFERENT check from accuracy (judge_task_accuracy),
+    which compares against ground truth instead.
+
+    DESIGN ALIGNED WITH RAGAS: confirmed via RAGAS/DeepEval documentation
+    that hallucination/faithfulness should be checked against the
+    RETRIEVED CONTEXT the model actually had access to, NOT ground truth
+    — these are two established, separate metrics (RAGAS: "Faithfulness
+    measures... against the retrieved context" vs. "Answer similarity...
+    against the ground truth answer"; DeepEval: "Use faithfulness for
+    RAG... don't use [ground-truth-based checking] on a live RAG
+    system"). The model never saw ground_truth when generating its
+    answer, so judging faithfulness against it is the wrong reference —
+    ground_truth is for accuracy/correctness, retrieved_context is for
+    faithfulness/hallucination.
+
+    ITERATION HISTORY (kept for context, since each was a real, tested
+    fix):
+    Round 1: original prompt told the judge citations not in ground_truth
+    ARE hallucination — wrong, since real citations are code-guaranteed
+    and validated. Fixed by excluding citations from consideration.
+    Round 2: judged against ground_truth (with retrieved_context as
+    secondary support) — caused false positives on true claims omitted
+    from ground_truth's necessarily brief summary (a real UAV-imaging
+    test case). Round 3 (this version): ground_truth removed from the
+    faithfulness check entirely, checking ONLY against retrieved_context,
+    matching established RAG evaluation practice.
+
+    Handles the no-context case (e.g. out-of-scope questions where no
+    tool was called) explicitly: if there's no retrieved_context, an
+    answer with no substantive claims (a decline) is trivially faithful;
+    but an answer that makes substantive claims WITHOUT any retrieved
+    grounding is flagged as a real, different problem — confidently
+    answering from ungrounded parametric knowledge, exactly the
+    fabrication pattern found repeatedly during Project 3's development.
     """
-    prompt = f"""You are checking an AI agent's answer for HALLUCINATION —
-specific factual claims, statistics, or citations that are NOT supported
-by the ground truth answer, even if the overall answer seems plausible.
+    if not retrieved_context or not retrieved_context.strip():
+        prompt = f"""You are checking whether an AI agent's answer makes
+any SUBSTANTIVE factual or scientific claim WITHOUT having any retrieved
+source material to ground it in (no tool was called, or no content was
+returned).
 
 Question: {question}
 
-Ground truth answer (the only source of verified facts): {ground_truth}
+Agent's answer: {agent_answer}
+
+Does the agent's answer contain any substantive factual or scientific
+claim (a mechanism, statistic, or specific finding) presented as fact,
+despite having NO retrieved source material to support it? Declining to
+answer, or appropriately saying information isn't available, is NOT a
+problem. Confidently stating specific facts with no grounding IS a
+problem — this is the exact fabrication-on-failure pattern this check is
+designed to catch.
+
+Respond with ONLY a JSON object, no other text:
+{{"hallucinated": true or false, "reasoning": "one sentence explaining why",
+  "unsupported_claims": ["list", "of", "specific", "ungrounded", "claims", "if", "any"]}}"""
+    else:
+        prompt = f"""You are checking an AI agent's answer for FAITHFULNESS
+to the actual retrieved source content — does the answer stick to what
+was genuinely retrieved, or does it add specific claims not supported by
+that source material?
+
+Question: {question}
+
+Actual retrieved source content (the ONLY source of truth for this
+check): {retrieved_context}
 
 Agent's answer: {agent_answer}
 
-Does the agent's answer contain any specific claim, number, citation, or
-fact that is NOT supported by the ground truth? Being appropriately vague
-or declining to answer is NOT hallucination. Adding a specific-sounding
-detail, statistic, or citation not present in the ground truth IS
-hallucination, even if it sounds plausible.
+IMPORTANT: IGNORE citations, source titles, publication years, and
+meta-statements like "based on the search_literature tool" or "sources
+consulted" — these are handled and verified by a SEPARATE, already-tested
+system, not part of this check.
+
+Does the agent's answer contain any SUBSTANTIVE factual or scientific
+claim — a mechanism, a statistic, a specific finding — that is NOT
+supported by the retrieved source content above? Being appropriately
+vague, or declining to answer, is NOT a problem. Inventing a
+specific-sounding detail not present in the retrieved content IS a
+problem, even if it sounds plausible or is independently true — the
+question is whether the answer is faithful to what was actually
+retrieved, not whether it's true in some absolute sense.
 
 Respond with ONLY a JSON object, no other text:
 {{"hallucinated": true or false, "reasoning": "one sentence explaining why",
