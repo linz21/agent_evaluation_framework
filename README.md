@@ -2,27 +2,17 @@
 
 **Author:** Linlin Zhang · [github.com/linz21](https://github.com/linz21)
 
-A statistical benchmarking framework for comparing two configurations
-("versions") of the Crop Advisory ReAct Agent (Project 3): local
+A statistical benchmarking framework comparing two configurations
+("versions") of the Crop Advisory ReAct Agent: local
 Qwen3-4B vs. Claude Sonnet 4.5 — the genuinely open question of local
 vs. API reliability and cost. (A third version, Qwen2.5-1.5B, was
 considered but dropped — its clear synthesis failures were already
-well-established from Project 3's own development, which is specifically
+well-established from the Crop Advisory ReAct Agent's own development, which is specifically
 what motivated moving to Qwen3-4B in the first place; comparing it again
 here wouldn't add new information.) Built on a semi-automated,
 human-reviewed golden dataset and rigorous statistical methods (bootstrap
 confidence intervals, permutation significance tests) rather than
 single-number comparisons.
-
-## Why this project exists
-
-Throughout Project 3's development, real, evidence-based findings emerged
-about differences between these configurations — synthesis quality,
-fabrication on tool failure, fabrication on memory verification — all
-discovered through manual, ad-hoc testing of individual questions. This
-project exists to make that comparison **systematic and statistically
-rigorous**: a fixed golden dataset, consistent metrics, and formal
-significance testing, rather than reading through transcripts by hand.
 
 ## Architecture
 
@@ -31,105 +21,78 @@ Golden dataset (40 human-reviewed Q&A pairs)
         ↓
 Benchmark runner — same 40 questions through both agent versions
         ↓
-Metrics: task accuracy (LLM-judge), tool-use efficiency,
-         hallucination rate, latency
+Metrics: task accuracy (LLM-judge vs. ground truth),
+         tool-use correctness/efficiency,
+         hallucination/faithfulness (LLM-judge vs. actual retrieved
+         context + memory — NOT ground truth, see Results),
+         latency
         ↓
-Statistical layer: bootstrap CIs (percentile + BCa) per version,
-                    permutation tests + multiple-comparison correction
-                    for pairwise significance between versions
+Statistical layer: BCa bootstrap CIs per version,
+                    permutation test for pairwise significance
         ↓
-Streamlit leaderboard — ranked results, drill-down into failure cases
+Streamlit leaderboard (planned) — ranked results, failure-case drill-down
 ```
-
-## Current Status
-
-**Built and validated:**
-- ✅ `src/stats/` — bootstrap CI (percentile and BCa methods), permutation
-  test, multiple-comparison correction (Bonferroni + Benjamini-Hochberg).
-  All three empirically validated against known test cases (see Results).
-- ✅ Golden dataset — 40 questions (10 literature, 10 yield, 10 multi-tool,
-  10 out-of-scope), each grounded in real retrieved data or a real API
-  call, semi-automated drafting with mandatory human review on every
-  single entry. See `data/golden_qa_pairs.json`.
-
-**Not yet built:**
-- ⬜ `src/eval/metrics.py` — task accuracy (LLM-as-judge), tool-use
-  efficiency, hallucination rate, latency tracking
-- ⬜ `src/eval/agent_runner.py` — runs the golden dataset through each of
-  Project 3's 2 agent versions
-- ⬜ `src/leaderboard/` — Streamlit app for ranked results + failure-case
-  drill-down
-- ⬜ Actually running the benchmark and analyzing results
 
 ## Setup
 
 ```bash
-# 1. Clone this repo alongside Projects 1-3 as SIBLING directories
+# 1. Clone alongside Projects 1-3 as SIBLING directories
 git clone https://github.com/linz21/agent_evaluation_framework.git
 cd agent_evaluation_framework
 
 # 2. Install dependencies
 pip install -r requirements.txt
-# Project 2's own dependencies also needed for golden dataset drafting
-pip install -r ../agri_rag_literature_ga/requirements.txt
+pip install -r ../agri_rag_literature_ga/requirements.txt   # for golden dataset drafting
+pip install -r ../crop_advisory_react_agent/requirements.txt  # for the benchmark runner
 
-# 3. Set your Anthropic API key (used for drafting + will be used for
-#    the Claude agent version + LLM-judge evaluation)
+# 3. Set your Anthropic API key
 export ANTHROPIC_API_KEY="sk-ant-..."
 
 # 4. Validate the golden dataset
 python scripts/validate_golden_dataset.py
-```
 
-> **Cost note:** the golden dataset was deliberately scoped to 40
-> questions (not the originally planned 100) given a real $5 API budget
-> constraint — see Results below for the honest statistical tradeoff this
-> involves. The benchmark run ahead (40 questions × 3 versions × LLM-judge
-> evaluation) will use meaningfully more API budget; consider your own
-> limits before running the full pipeline.
+# 5. Run the benchmark for both agent versions
+python scripts/run_benchmark.py --version claude-sonnet-4.5
+python scripts/run_benchmark.py --version qwen3-4b
+
+# 6. Run the statistical analysis
+python scripts/analyze_results.py
+```
 
 ## Tech Stack
 
 `numpy` + `scipy` (statistical methods) · Claude Sonnet 4.5 (golden
-dataset drafting, one of 2 benchmarked agent versions, and LLM-judge) ·
-Project 2's retriever (real literature context for drafting) · Project 1's
-live API (real yield data for drafting) · `Streamlit` (planned, for the
-leaderboard)
+dataset drafting, one of 2 benchmarked agent versions, and LLM-judge,
+with Opus as the primary judge to avoid self-evaluation bias) · Project
+2's retriever (real literature context) · Project 1's live API (real
+yield data) · `Streamlit` (planned, for the leaderboard)
 
 ## Results
 
-**Statistics module — validated against known test cases, not just
-implemented and trusted:**
+### Final Statistical Comparison (Qwen3-4B vs. Claude Sonnet 4.5, n=40 each)
 
-| Method | Validation | Result |
-|--------|-----------|--------|
-| Percentile bootstrap | Known normal distribution (true mean=10) | CI correctly captured true mean |
-| BCa bootstrap | Symmetric normal data | Bias/acceleration correction ≈ 0, as expected |
-| BCa bootstrap | Skewed proportion (92/100 binary accuracy) | Correction meaningfully differed from percentile — confirms BCa matters for this project's actual metric type |
-| Permutation test | Identical distributions | p=0.73, correctly not significant |
-| Permutation test | Distributions shifted by 20 | p≈0.0000, correctly significant |
-| Permutation test | One-sided variant | Correctly detected direction |
-| Bonferroni correction | 3 known p-values [0.01, 0.03, 0.04] | Correctly flagged only p=0.01 as significant |
-| Benjamini-Hochberg | Same 3 p-values | Correctly more permissive than Bonferroni (all 3 significant) |
+| Metric | Qwen3-4B | Claude Sonnet 4.5 | p-value | Significant? |
+|---|---|---|---|---|
+| Task Accuracy (higher better) | 0.725 [0.525, 0.825] | 0.650 [0.475, 0.775] | 0.633 | No |
+| Hallucination Rate (lower better) | 0.100 [0.025, 0.200] | 0.025 [0.000, 0.075] | 0.364 | No |
+| Tool Selection Correctness (higher better) | 0.675 [0.475, 0.775] | **0.950** [0.802, 0.975] | **0.004** | **Yes — Claude** |
+| Latency, seconds (lower better) | 163.0 [126.4, 199.2] | **32.1** [23.4, 42.6] | **0.000** | **Yes — Claude** |
 
-**Golden dataset construction — 6 real bugs found and fixed** (see
-`data/golden_qa_pairs.json`'s construction history in commit messages for
-full detail): a path-resolution bug, literature context truncated too
-aggressively (cutting off abstract conclusions), a drafting token limit
-too low (causing real truncated answers to be accidentally accepted
-twice before being caught), a genuine Claude API refusal on benign
-agricultural nanotechnology vocabulary being silently treated as a valid
-answer, the multi-tool category never calling the real yield API at all,
-and a stray Chroma index almost committed (same root cause as a bug found
-in Project 3).
+(95% BCa bootstrap confidence intervals shown in brackets; all values
+from 10,000 bootstrap/permutation iterations, random seed 42 for
+reproducibility.)
 
-**Scope reduction, stated honestly:** originally planned as 100 questions
-per the initial project spec; reduced to 40 after a real budget
-constraint. The honest statistical cost: wider bootstrap confidence
-intervals and reduced power to detect real differences between agent
-versions via the permutation tests. This is a real, acknowledged
-limitation — not hidden — and was a deliberate tradeoff against actually
-completing a working, fully-validated benchmark within budget.
+### Hallucination metric design — aligned with RAGAS, not ad-hoc
+
+Confirmed via RAGAS/DeepEval documentation that hallucination/faithfulness
+should be judged against the **retrieved context** the model actually had
+access to, not ground truth — two separate, established metrics. Our
+`judge_hallucination()` checks only against the real tool Observation
+content and memory context from that specific run; `judge_task_accuracy()`
+separately checks against ground truth. This went through 3 real,
+tested design iterations before landing here — see inline docstrings in
+`src/eval/metrics.py` for the full iteration history, each triggered by
+an actual false positive found during testing.
 
 ## Project Structure
 
@@ -140,15 +103,24 @@ agent_evaluation_framework/
 │   │   ├── bootstrap.py            # Percentile + BCa confidence intervals
 │   │   ├── permutation.py          # Non-parametric significance testing
 │   │   └── multiple_comparison.py  # Bonferroni + Benjamini-Hochberg
-│   ├── eval/
-│   │   ├── question_bank.py        # 40 candidate questions, by category
-│   │   └── golden_dataset_builder.py  # Real-data-grounded drafting logic
-│   └── leaderboard/                 # (planned) Streamlit leaderboard app
+│   └── eval/
+│       ├── question_bank.py        # 40 candidate questions, by category
+│       ├── golden_dataset_builder.py  # Real-data-grounded drafting logic
+│       ├── agent_runner.py         # Cross-project loading + version switching
+│       └── metrics.py              # All 4 metrics; hallucination check
+│                                    # aligned with RAGAS (see Results)
 ├── scripts/
 │   ├── build_golden_dataset.py     # Interactive review/build CLI
-│   └── validate_golden_dataset.py  # Regression check against known-bad patterns
+│   ├── validate_golden_dataset.py  # Regression check
+│   ├── validate_metrics.py         # Judge validation (cheap Haiku tests)
+│   ├── run_benchmark.py            # Runs both versions, all 4 metrics
+│   ├── inspect_results.py          # Full-detail per-question inspection
+│   ├── diagnose_crispr_refusal.py  # Diagnostic for the CRISPR finding
+│   ├── analyze_results.py          # Bootstrap CIs + permutation tests
+│   └── retry_failed_judgments.py   # Retries only failed judge calls
 ├── data/
-│   └── golden_qa_pairs.json        # The 40-question golden dataset
+│   ├── golden_qa_pairs.json        # The 40-question golden dataset
+│   └── results/                    # Per-version benchmark results
 ├── configs/config.yaml             # All settings — single source of truth
-└── tests/
+└── tests/test_metrics.py           # 13 regression tests
 ```
