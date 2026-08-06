@@ -30,7 +30,8 @@ Metrics: task accuracy (LLM-judge vs. ground truth),
 Statistical layer: BCa bootstrap CIs per version,
                     permutation test for pairwise significance
         ↓
-Streamlit leaderboard (planned) — ranked results, failure-case drill-down
+Streamlit leaderboard (streamlit run src/leaderboard/app.py) — ranked
+results with confidence intervals, failure-case drill-down
 ```
 
 ## Setup
@@ -65,7 +66,7 @@ python scripts/analyze_results.py
 dataset drafting, one of 2 benchmarked agent versions, and LLM-judge,
 with Opus as the primary judge to avoid self-evaluation bias) · Project
 2's retriever (real literature context) · Project 1's live API (real
-yield data) · `Streamlit` (planned, for the leaderboard)
+yield data) · `Streamlit` (leaderboard UI)
 
 ## Results
 
@@ -73,14 +74,17 @@ yield data) · `Streamlit` (planned, for the leaderboard)
 
 | Metric | Qwen3-4B | Claude Sonnet 4.5 | p-value | Significant? |
 |---|---|---|---|---|
-| Task Accuracy (higher better) | 0.725 [0.525, 0.825] | 0.650 [0.475, 0.775] | 0.633 | No |
-| Hallucination Rate (lower better) | 0.100 [0.025, 0.200] | 0.025 [0.000, 0.075] | 0.364 | No |
-| Tool Selection Correctness (higher better) | 0.675 [0.475, 0.775] | **0.950** [0.802, 0.975] | **0.004** | **Yes — Claude** |
-| Latency, seconds (lower better) | 163.0 [126.4, 199.2] | **32.1** [23.4, 42.6] | **0.000** | **Yes — Claude** |
+| Task Accuracy (higher better) | 0.875 [0.700, 0.925] | 0.825 [0.650, 0.900] | 0.755 | No |
+| Hallucination Rate (lower better) | 0.125 [0.025, 0.225] | 0.000 [0.000, 0.000] | 0.056 | No (borderline) |
+| Tool Selection Correctness (higher better) | 0.750 [0.575, 0.850] | 0.925 [0.775, 0.975] | 0.063 | No (borderline) |
+| Latency, seconds (lower better) | 180.9 [144.0, 214.0] | **34.1** [24.7, 44.9] | **0.000** | **Yes — Claude** |
 
-(95% BCa bootstrap confidence intervals shown in brackets; all values
-from 10,000 bootstrap/permutation iterations, random seed 42 for
-reproducibility.)
+(95% BCa bootstrap confidence intervals shown in brackets; 10,000
+bootstrap/permutation iterations, random seed 42. Each agent version ran
+with its own independent long-term memory store — an earlier version of
+this analysis shared one memory pool across both versions, letting each
+version's answers leak into the other's context; that confound is now
+resolved.)
 
 ### Hallucination metric design — aligned with RAGAS, not ad-hoc
 
@@ -103,17 +107,20 @@ agent_evaluation_framework/
 │   │   ├── bootstrap.py            # Percentile + BCa confidence intervals
 │   │   ├── permutation.py          # Non-parametric significance testing
 │   │   └── multiple_comparison.py  # Bonferroni + Benjamini-Hochberg
-│   └── eval/
-│       ├── question_bank.py        # 40 candidate questions, by category
-│       ├── golden_dataset_builder.py  # Real-data-grounded drafting logic
-│       ├── agent_runner.py         # Cross-project loading + version switching
-│       └── metrics.py              # All 4 metrics; hallucination check
-│                                    # aligned with RAGAS (see Results)
+│   ├── eval/
+│   │   ├── question_bank.py        # 40 candidate questions, by category
+│   │   ├── golden_dataset_builder.py  # Real-data-grounded drafting logic
+│   │   ├── agent_runner.py         # Cross-project loading + version switching
+│   │   └── metrics.py              # All 4 metrics; hallucination check
+│   │                                # aligned with RAGAS (see Results)
+│   └── leaderboard/
+│       └── app.py                  # Streamlit leaderboard + drill-down
 ├── scripts/
 │   ├── build_golden_dataset.py     # Interactive review/build CLI
 │   ├── validate_golden_dataset.py  # Regression check
 │   ├── validate_metrics.py         # Judge validation (cheap Haiku tests)
 │   ├── run_benchmark.py            # Runs both versions, all 4 metrics
+│   ├── validate_results.py         # Comprehensive result-file validation
 │   ├── inspect_results.py          # Full-detail per-question inspection
 │   ├── diagnose_crispr_refusal.py  # Diagnostic for the CRISPR finding
 │   ├── analyze_results.py          # Bootstrap CIs + permutation tests

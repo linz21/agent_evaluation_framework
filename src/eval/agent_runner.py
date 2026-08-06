@@ -96,6 +96,17 @@ def _build_version_config_file(project3_path: Path, version: dict) -> str:
     the llm provider/model fields for this specific version, and writes
     the result to a temp file. Returns the temp file's path — caller is
     responsible for deleting it after use.
+
+    ALSO overrides memory.long_term_persist_dir to a version-specific
+    path. Found via a real leaderboard inspection: both agent versions
+    were sharing the SAME long-term memory store by default (Project 3's
+    LongTermMemory() was always called with no arguments, hardcoding one
+    path regardless of provider/model) — meaning one version's answers
+    could leak into the other's context via memory retrieval, a real
+    confound for an independent comparison. Requires the corresponding
+    Project 3 fix making this path configurable (see that project's
+    commit history) — this override is a no-op on older versions of
+    that file that don't yet read this config key.
     """
     with open(project3_path / "configs" / "config.yaml") as f:
         cfg = yaml.safe_load(f)
@@ -105,6 +116,8 @@ def _build_version_config_file(project3_path: Path, version: dict) -> str:
         cfg["llm"]["model_name"] = version["model_name"]
     elif version["provider"] == "anthropic":
         cfg["llm"]["anthropic_model"] = version["anthropic_model"]
+
+    cfg.setdefault("memory", {})["long_term_persist_dir"] = f"data/long_term_memory_{version['id']}"
 
     tmp = tempfile.NamedTemporaryFile(mode="w", suffix=".yaml", delete=False)
     yaml.safe_dump(cfg, tmp)

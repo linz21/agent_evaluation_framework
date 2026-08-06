@@ -29,6 +29,7 @@ from src.eval.agent_runner import run_question_on_version
 from src.eval.metrics import (
     extract_tools_called,
     extract_observations,
+    extract_memory_context,
     compute_tool_selection_correctness,
     compute_tool_efficiency,
     judge_task_accuracy,
@@ -88,23 +89,51 @@ def run_one_version(version: dict, golden_data: list[dict], project3_path: Path,
         tool_selection = compute_tool_selection_correctness(entry["category"], tools_called)
         tool_efficiency = compute_tool_efficiency(tools_called)
         retrieved_context = extract_observations(run_result.get("transcript", ""))
+        memory_context = extract_memory_context(run_result.get("transcript", ""))
+        # Combined: everything the model actually had access to when
+        # generating its answer — tool outputs from THIS run, plus any
+        # real memory context (short/long-term) also present in the
+        # prompt. A claim grounded in either is faithful, not hallucinated.
+        # NOTE: previously pre-combined into one "full_context" string,
+        # but the judge prompt still labeled the whole blob "retrieved
+        # source content" — a framing that specifically implies tool
+        # retrieval, causing the judge to not recognize the memory
+        # portion as legitimate grounding (confirmed via a real test:
+        # the judge's own reasoning only referenced the tool-failure
+        # error message, ignoring memory content that was technically
+        # present in the combined string). Now passed as separate,
+        # clearly-labeled parameters instead — see judge_hallucination.
 
-        try:
-            accuracy = judge_task_accuracy(
-                question, entry["ground_truth"], run_result["answer"], api_key, judge_model
-            )
-        except Exception as e:
-            print(f"  ERROR judging accuracy: {e}")
-            accuracy = {"correct": None, "reasoning": f"Judge error: {e}"}
+        agent_run_failed = not run_result.get("answer", "").strip()
 
-        try:
-            hallucination = judge_hallucination(
-                question, run_result["answer"], api_key, judge_model,
-                retrieved_context=retrieved_context,
-            )
-        except Exception as e:
-            print(f"  ERROR judging hallucination: {e}")
-            hallucination = {"hallucinated": None, "reasoning": f"Judge error: {e}", "unsupported_claims": []}
+        if agent_run_failed:
+            # Don't call either judge on an empty answer — a real test
+            # showed this produces a confusing judge response ("I need to
+            # see the agent's answer...") instead of a clear, honest
+            # signal that the AGENT RUN ITSELF failed upstream. Recording
+            # this explicitly makes agent-run failures visibly distinct
+            # from genuine judged incorrectness/hallucination in the
+            # results, rather than looking like a None-valued judge quirk.
+            print("  SKIPPED judging: agent produced no answer (see agent error above)")
+            accuracy = {"correct": None, "reasoning": "Agent run failed — no answer to judge."}
+            hallucination = {"hallucinated": None, "reasoning": "Agent run failed — no answer to judge.", "unsupported_claims": []}
+        else:
+            try:
+                accuracy = judge_task_accuracy(
+                    question, entry["ground_truth"], run_result["answer"], api_key, judge_model
+                )
+            except Exception as e:
+                print(f"  ERROR judging accuracy: {e}")
+                accuracy = {"correct": None, "reasoning": f"Judge error: {e}"}
+
+            try:
+                hallucination = judge_hallucination(
+                    question, run_result["answer"], api_key, judge_model,
+                    tool_context=retrieved_context, memory_context=memory_context,
+                )
+            except Exception as e:
+                print(f"  ERROR judging hallucination: {e}")
+                hallucination = {"hallucinated": None, "reasoning": f"Judge error: {e}", "unsupported_claims": []}
 
         result_row = {
             "question": question,
@@ -123,6 +152,8 @@ def run_one_version(version: dict, golden_data: list[dict], project3_path: Path,
             "hallucination_reasoning": hallucination["reasoning"],
             "unsupported_claims": hallucination["unsupported_claims"],
             "retrieved_context": retrieved_context,
+            "memory_context": memory_context,
+            "agent_run_failed": agent_run_failed,
         }
 
         existing.append(result_row)

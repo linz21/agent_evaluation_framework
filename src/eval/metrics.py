@@ -39,6 +39,26 @@ EXPECTED_TOOLS_BY_CATEGORY = {
 }
 
 
+def extract_memory_context(transcript: str) -> str:
+    """
+    Extracts the memory context block from the transcript — either
+    short-term "Recent conversation in this session:" (Redis) or
+    long-term "Potentially relevant past interactions:" (vector store),
+    or both. This is real content the model legitimately had access to
+    when generating its answer, just like tool Observations — found via
+    a real test that answers correctly recalling a TRUE prior result
+    from memory (e.g. a real yield number from an earlier session,
+    without re-calling predict_corn_yield) were being flagged as
+    hallucination, since extract_observations() alone only captures
+    THIS run's tool outputs, missing memory content the model also saw.
+    """
+    match = re.search(
+        r"((?:Recent conversation in this session:|Potentially relevant past interactions).*?)\n\nBegin!",
+        transcript, re.DOTALL
+    )
+    return match.group(1).strip() if match else ""
+
+
 def extract_observations(transcript: str) -> str:
     """
     Extracts all "Observation:" blocks from a transcript — the ACTUAL
@@ -113,7 +133,12 @@ def _call_judge(prompt: str, api_key: str, judge_model: str) -> dict:
     """
     client = anthropic.Anthropic(api_key=api_key)
     response = client.messages.create(
-        model=judge_model, max_tokens=500, temperature=0,
+        # NOTE: temperature=0 removed — a real error surfaced when
+        # switching to claude-opus-4-8 (after claude-opus-4-1 was
+        # deprecated): "temperature is deprecated for this model." Newer
+        # models don't need explicit temperature=0 for near-deterministic
+        # output the way older ones did.
+        model=judge_model, max_tokens=500,
         messages=[{"role": "user", "content": prompt}],
     )
     text = response.content[0].text if response.content else ""
@@ -169,45 +194,43 @@ Respond with ONLY a JSON object, no other text:
 
 def judge_hallucination(question: str, agent_answer: str,
                         api_key: str, judge_model: str = "claude-opus-4-1",
-                        retrieved_context: str = None) -> dict:
+                        tool_context: str = None, memory_context: str = None) -> dict:
     """
     Detects whether the agent's answer is FAITHFUL to what it actually
-    retrieved — a DIFFERENT check from accuracy (judge_task_accuracy),
+    had access to — a DIFFERENT check from accuracy (judge_task_accuracy),
     which compares against ground truth instead.
 
     DESIGN ALIGNED WITH RAGAS: confirmed via RAGAS/DeepEval documentation
     that hallucination/faithfulness should be checked against the
-    RETRIEVED CONTEXT the model actually had access to, NOT ground truth
-    — these are two established, separate metrics (RAGAS: "Faithfulness
-    measures... against the retrieved context" vs. "Answer similarity...
-    against the ground truth answer"; DeepEval: "Use faithfulness for
-    RAG... don't use [ground-truth-based checking] on a live RAG
-    system"). The model never saw ground_truth when generating its
-    answer, so judging faithfulness against it is the wrong reference —
-    ground_truth is for accuracy/correctness, retrieved_context is for
-    faithfulness/hallucination.
+    RETRIEVED CONTEXT the model actually had access to, NOT ground truth.
 
-    ITERATION HISTORY (kept for context, since each was a real, tested
-    fix):
-    Round 1: original prompt told the judge citations not in ground_truth
-    ARE hallucination — wrong, since real citations are code-guaranteed
-    and validated. Fixed by excluding citations from consideration.
-    Round 2: judged against ground_truth (with retrieved_context as
-    secondary support) — caused false positives on true claims omitted
-    from ground_truth's necessarily brief summary (a real UAV-imaging
-    test case). Round 3 (this version): ground_truth removed from the
-    faithfulness check entirely, checking ONLY against retrieved_context,
-    matching established RAG evaluation practice.
+    ITERATION HISTORY:
+    Round 1: citations incorrectly flagged as hallucination — fixed,
+    excluded from consideration.
+    Round 2: judged against ground_truth — caused false positives on
+    true claims simply omitted from ground_truth's brief summary — fixed,
+    switched to checking against retrieved tool context only.
+    Round 3 (THIS version): a real test showed the model correctly,
+    honestly recalling a TRUE prior result from memory (e.g. a real
+    yield number from an earlier session) still got flagged as
+    hallucination — tool_context and memory_context were being combined
+    into ONE string before being passed in, but the prompt still labeled
+    the whole blob "retrieved source content," a framing that specifically
+    implies tool retrieval. The judge's own reasoning confirmed it wasn't
+    recognizing the memory portion as legitimate grounding even though it
+    was technically present in the string. Fixed by taking both as
+    SEPARATE parameters and giving each its own clearly labeled section
+    in the prompt, explicitly stating a claim grounded in EITHER is
+    faithful — not one mislabeled combined blob.
 
-    Handles the no-context case (e.g. out-of-scope questions where no
-    tool was called) explicitly: if there's no retrieved_context, an
-    answer with no substantive claims (a decline) is trivially faithful;
-    but an answer that makes substantive claims WITHOUT any retrieved
-    grounding is flagged as a real, different problem — confidently
-    answering from ungrounded parametric knowledge, exactly the
-    fabrication pattern found repeatedly during Project 3's development.
+    Handles the no-context case (neither tool nor memory content) the
+    same as before: an answer with no substantive claims is trivially
+    faithful; substantive claims with zero grounding are flagged as the
+    real fabrication-on-failure pattern this check exists to catch.
     """
-    if not retrieved_context or not retrieved_context.strip():
+    has_context = (tool_context and tool_context.strip()) or (memory_context and memory_context.strip())
+
+    if not has_context:
         prompt = f"""You are checking whether an AI agent's answer makes
 any SUBSTANTIVE factual or scientific claim WITHOUT having any retrieved
 source material to ground it in (no tool was called, or no content was
@@ -229,15 +252,24 @@ Respond with ONLY a JSON object, no other text:
 {{"hallucinated": true or false, "reasoning": "one sentence explaining why",
   "unsupported_claims": ["list", "of", "specific", "ungrounded", "claims", "if", "any"]}}"""
     else:
+        sections = []
+        if tool_context and tool_context.strip():
+            sections.append(f"TOOL RESULTS FROM THIS RUN (real, current data):\n{tool_context}")
+        if memory_context and memory_context.strip():
+            sections.append(
+                f"MEMORY OF PAST INTERACTIONS (also real, genuine grounding — a claim "
+                f"the agent correctly recalls from a prior real exchange, even from a "
+                f"different session, is faithful, NOT hallucination):\n{memory_context}"
+            )
+        context_block = "\n\n".join(sections)
+
         prompt = f"""You are checking an AI agent's answer for FAITHFULNESS
-to the actual retrieved source content — does the answer stick to what
-was genuinely retrieved, or does it add specific claims not supported by
-that source material?
+to what it actually had access to — does the answer stick to real, given
+information, or does it add specific claims not supported by ANY of it?
 
 Question: {question}
 
-Actual retrieved source content (the ONLY source of truth for this
-check): {retrieved_context}
+{context_block}
 
 Agent's answer: {agent_answer}
 
@@ -248,12 +280,12 @@ system, not part of this check.
 
 Does the agent's answer contain any SUBSTANTIVE factual or scientific
 claim — a mechanism, a statistic, a specific finding — that is NOT
-supported by the retrieved source content above? Being appropriately
-vague, or declining to answer, is NOT a problem. Inventing a
-specific-sounding detail not present in the retrieved content IS a
-problem, even if it sounds plausible or is independently true — the
-question is whether the answer is faithful to what was actually
-retrieved, not whether it's true in some absolute sense.
+supported by EITHER section above (tool results or memory)? Being
+appropriately vague, or declining to answer, is NOT a problem. A claim
+correctly recalled from memory of a genuine past interaction is NOT
+hallucination, even if it's not in this run's tool results. Inventing a
+specific-sounding detail not present in EITHER section IS a problem,
+even if it sounds plausible or is independently true.
 
 Respond with ONLY a JSON object, no other text:
 {{"hallucinated": true or false, "reasoning": "one sentence explaining why",

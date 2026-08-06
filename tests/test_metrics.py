@@ -62,6 +62,66 @@ class TestExtractToolsCalled:
         assert extract_tools_called(transcript) == []
 
 
+class TestExtractMemoryContext:
+    def test_long_term_memory_extracted(self):
+        from src.eval.metrics import extract_memory_context
+        transcript = (
+            "IMPORTANT: do NOT include a numbered reference list...\n\n"
+            "Potentially relevant past interactions (may be from a different session):\n"
+            "- Q: What corn yield should I expect in Nebraska in 2024?\n"
+            "  A: The predicted corn yield for Nebraska in 2024 is 169.56 bushels per acre.\n\n"
+            "Begin!\nQuestion: ...\nThought:"
+        )
+        result = extract_memory_context(transcript)
+        assert "169.56 bushels per acre" in result
+
+    def test_short_term_memory_extracted(self):
+        from src.eval.metrics import extract_memory_context
+        transcript = (
+            "Recent conversation in this session:\n"
+            "user: What corn yield should I expect in Illinois?\n"
+            "assistant: 169.82 bu/acre\n\n"
+            "Begin!\nQuestion: ...\nThought:"
+        )
+        result = extract_memory_context(transcript)
+        assert "169.82 bu/acre" in result
+
+    def test_no_memory_context_returns_empty(self):
+        from src.eval.metrics import extract_memory_context
+        transcript = "Some transcript with no memory section.\n\nBegin!\nQuestion: ...\nThought:"
+        assert extract_memory_context(transcript) == ""
+
+
+class TestExtractObservations:
+    def test_single_observation_extracted(self):
+        from src.eval.metrics import extract_observations
+        transcript = (
+            "Action: search_literature\n"
+            "Action Input: {}\n"
+            "Observation: Real retrieved content here.\n"
+            "Thought: I now know the final answer."
+        )
+        result = extract_observations(transcript)
+        assert result == "Real retrieved content here."
+
+    def test_multiple_observations_joined(self):
+        from src.eval.metrics import extract_observations
+        transcript = (
+            "Observation: First tool result.\n"
+            "Thought: Need another tool.\n"
+            "Observation: Second tool result.\n"
+            "Thought: Done."
+        )
+        result = extract_observations(transcript)
+        assert "First tool result." in result
+        assert "Second tool result." in result
+
+    def test_no_observations_returns_empty_string(self):
+        from src.eval.metrics import extract_observations
+        transcript = "Thought: This is out of scope.\nFinal Answer: I can't help with that."
+        assert extract_observations(transcript) == ""
+
+
 class TestToolSelectionCorrectness:
     def test_out_of_scope_correct_when_no_tools_called(self):
         from src.eval.metrics import compute_tool_selection_correctness

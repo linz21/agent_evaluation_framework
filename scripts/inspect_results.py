@@ -40,7 +40,9 @@ def main():
         print(f"  reasoning: {r['hallucination_reasoning']}")
         print(f"  unsupported_claims: {r['unsupported_claims']}")
         print()
-        print(f"RETRIEVED CONTEXT (what the judge actually checked against):\n{r.get('retrieved_context', '(not saved in this result)')}")
+        print(f"RETRIEVED CONTEXT (tool observations from this run):\n{r.get('retrieved_context', '(not saved in this result)')}")
+        print()
+        print(f"MEMORY CONTEXT (real prior interactions the model saw):\n{r.get('memory_context', '(not saved in this result)') or '(none for this question)'}")
         print()
 
 

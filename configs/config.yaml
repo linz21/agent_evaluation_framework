@@ -81,7 +81,7 @@ metrics:
   # reduction (100 -> 40) already cuts total judge-call cost by 60%
   # regardless of which model is used.
   judge_provider: "anthropic"
-  judge_model: "claude-opus-4-1"
+  judge_model: "claude-opus-4-8"
   hallucination_check: true
   track_latency: true
   track_tool_calls: true
