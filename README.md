@@ -14,6 +14,8 @@ human-reviewed golden dataset and rigorous statistical methods (bootstrap
 confidence intervals, permutation significance tests) rather than
 single-number comparisons.
 
+**🔗 Live demo:** [crop-agent-eval.streamlit.app](https://crop-agent-eval.streamlit.app/)
+
 ## Architecture
 
 ```
@@ -64,8 +66,8 @@ python scripts/analyze_results.py
 
 `numpy` + `scipy` (statistical methods) · Claude Sonnet 4.5 (golden
 dataset drafting, one of 2 benchmarked agent versions, and LLM-judge,
-with Opus as the primary judge to avoid self-evaluation bias) · Project
-2's retriever (real literature context) · Project 1's live API (real
+with Opus as the primary judge to avoid self-evaluation bias) · Agricultural RAG System's retriever (real literature context) · Corn
+Yield Prediction's live API (real
 yield data) · `Streamlit` (leaderboard UI)
 
 ## Results
