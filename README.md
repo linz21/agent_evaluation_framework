@@ -56,6 +56,7 @@ python scripts/validate_golden_dataset.py
 
 # 5. Run the benchmark for both agent versions
 python scripts/run_benchmark.py --version claude-sonnet-4.5
+python scripts/run_benchmark.py --version claude-sonnet-5.5   # current Claude version (see Model update)
 python scripts/run_benchmark.py --version qwen3-4b
 
 # 6. Run the statistical analysis
@@ -69,6 +70,21 @@ dataset drafting, one of 2 benchmarked agent versions, and LLM-judge,
 with Opus as the primary judge to avoid self-evaluation bias) · Agricultural RAG System's retriever (real literature context) · Corn
 Yield Prediction's live API (real
 yield data) · `Streamlit` (leaderboard UI)
+
+## Model update (Oct 2026)
+
+Claude Sonnet 4.5 is deprecated (retires 2026-11-30), so the code and config
+now target **Claude Sonnet 5.5**: `configs/config.yaml` has a
+`claude-sonnet-5.5` agent version, the drafting model is `claude-sonnet-5-5`,
+and the API calls were updated for 5.5 (no `temperature`; the reply is read
+from the text block because a thinking block may come first; judge defaults
+point at `claude-opus-4-8`).
+
+**The Results below were produced with Sonnet 4.5 and are unchanged.** They
+are a record of what was tested, so they stay labeled 4.5. There are no
+Sonnet 5.5 results yet; run `python scripts/run_benchmark.py --version
+claude-sonnet-5.5` to produce them. The golden dataset was also drafted with
+4.5 (then human-reviewed).
 
 ## Results
 

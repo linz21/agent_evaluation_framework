@@ -37,9 +37,18 @@ agent_versions:
   - id: "qwen3-4b"
     provider: "local"
     model_name: "Qwen/Qwen3-4B-Instruct-2507"
+  # HISTORICAL: all benchmark results to date for this version were produced
+  # with Sonnet 4.5, which is deprecated (retires 2026-11-30) and can't be
+  # re-run after that. Kept so the saved results stay labeled truthfully.
   - id: "claude-sonnet-4.5"
     provider: "anthropic"
     anthropic_model: "claude-sonnet-4-5"
+  # CURRENT: Sonnet 5.5. No benchmark results yet — run
+  #   python scripts/run_benchmark.py --version claude-sonnet-5.5
+  # to produce data/results/claude-sonnet-5.5.json.
+  - id: "claude-sonnet-5.5"
+    provider: "anthropic"
+    anthropic_model: "claude-sonnet-5-5"
 
 golden_dataset:
   path: "data/golden_qa_pairs.json"
@@ -57,7 +66,7 @@ golden_dataset:
   # every single one before it's added — never auto-accepted. See
   # scripts/build_golden_dataset.py.
   draft_llm_provider: "anthropic"  # drafting quality matters even though this is a "draft"
-  draft_llm_model: "claude-sonnet-4-5"
+  draft_llm_model: "claude-sonnet-5-5"  # the existing golden dataset was drafted with 4.5
   # Equal split across the 4 categories, kept simple given the reduced
   # scope — multi_tool retained (not dropped) since it's arguably the
   # most interesting test of genuine agent behavior (tool orchestration),

@@ -141,7 +141,8 @@ def _call_judge(prompt: str, api_key: str, judge_model: str) -> dict:
         model=judge_model, max_tokens=500,
         messages=[{"role": "user", "content": prompt}],
     )
-    text = response.content[0].text if response.content else ""
+    # Read the text block by type — a thinking block may come first.
+    text = next((b.text for b in response.content if b.type == "text"), "")
 
     # Judge is instructed to respond with ONLY a JSON object, but strip
     # markdown code fences defensively in case the model wraps it anyway
@@ -154,7 +155,7 @@ def _call_judge(prompt: str, api_key: str, judge_model: str) -> dict:
 
 
 def judge_task_accuracy(question: str, ground_truth: str, agent_answer: str,
-                        api_key: str, judge_model: str = "claude-opus-4-1") -> dict:
+                        api_key: str, judge_model: str = "claude-opus-4-8") -> dict:
     """
     Binary correct/incorrect verdict — does the agent's answer correctly
     address the question, compared to the human-reviewed ground truth?
@@ -193,7 +194,7 @@ Respond with ONLY a JSON object, no other text:
 
 
 def judge_hallucination(question: str, agent_answer: str,
-                        api_key: str, judge_model: str = "claude-opus-4-1",
+                        api_key: str, judge_model: str = "claude-opus-4-8",
                         tool_context: str = None, memory_context: str = None) -> dict:
     """
     Detects whether the agent's answer is FAITHFUL to what it actually

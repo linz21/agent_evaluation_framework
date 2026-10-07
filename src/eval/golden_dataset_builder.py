@@ -143,8 +143,17 @@ def get_real_yield_prediction(state: str, year: int, yield_api_url: str) -> str:
         return f"API call failed: {e} — this question cannot be drafted until the API is reachable."
 
 
+def _first_text(response) -> str:
+    """Returns the first text block. With adaptive thinking, content may
+    start with a thinking block that has no .text attribute."""
+    for block in response.content:
+        if block.type == "text":
+            return block.text
+    return ""
+
+
 def draft_answer_with_llm(question: str, real_context: str, api_key: str,
-                          model: str = "claude-sonnet-4-5") -> str:
+                          model: str = "claude-sonnet-5-5") -> str:
     """
     Has an LLM draft a candidate answer grounded ONLY in the real_context
     provided — explicitly instructed not to add outside knowledge, since
@@ -187,7 +196,10 @@ Real data:
 Answer:"""
 
     response = client.messages.create(
-        model=model, max_tokens=1200, temperature=0,
+        # temperature removed: Sonnet 5.5 rejects it (400). max_tokens also
+        # covers adaptive-thinking tokens, so it is generous and effort is low.
+        model=model, max_tokens=2048,
+        output_config={"effort": "low"},
         messages=[{"role": "user", "content": prompt}],
     )
 
@@ -212,7 +224,7 @@ Answer:"""
             f"Claude refused to draft an answer for this question "
             f"(stop_reason='refusal', likely a false-positive safety "
             f"trigger on specific vocabulary in the source material). "
-            f"Partial text was: {response.content[0].text if response.content else '(none)'}"
+            f"Partial text was: {_first_text(response) or '(none)'}"
         )
 
-    return response.content[0].text if response.content else ""
+    return _first_text(response)
